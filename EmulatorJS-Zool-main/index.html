@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EmulatorJS - Automatic ROM Loading</title>
+    <link rel="icon" href="docs/favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/vnd.microsoft.icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Include your effects.css file -->
+    <link rel="stylesheet" href="effects.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: url('Zool_start_background.gif') center center / cover no-repeat fixed;
+        }
+        body {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 2vh;
+        }
+        #display {
+            width: 100%;
+            height: 100%;
+        }
+        #game {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Hide the input fields */
+        #hidden-inputs {
+            display: none;
+        }
+
+        /* Center the Play Button image */
+        #play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        /* Adjust the image size if needed */
+        #play-button img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hidden Inputs -->
+    <div id="hidden-inputs">
+        <input type="text" id="rom-url" value="https://raw.githubusercontent.com/FrankieDaDev/EmulatorJS-Zool/main/Zool%20(U).smc">
+        <input type="text" id="bios-url" value="https://raw.githubusercontent.com/FrankieDaDev/EmulatorJS-Zool/main/scph5501.bin">
+    </div>
+
+    <!-- Play Button -->
+    <div id="play-button">
+        <img src="Play_Button.png" alt="Play Now">
+    </div>
+
+    <!-- Emulator Container -->
+    <div id="display">
+        <div id="game"></div>
+    </div>
+
+    <script>
+        // Function to determine the emulator core based on the ROM file extension
+        const getCoreFromExtension = (ext) => {
+            const coreMap = {
+                "nes": "nes",
+                "unf": "nes",
+                "smc": "snes",
+                "sfc": "snes",
+                "fig": "snes",
+                "bin": "psx",
+                "img": "psx",
+                "iso": "psx",
+                "cue": "psx",
+                // Add other mappings as needed
+            };
+            return coreMap[ext.toLowerCase()] || null;
+        };
+
+        // Load ROM and BIOS when the Play Button is clicked
+        document.getElementById("play-button").addEventListener("click", () => {
+            const romUrl = document.getElementById("rom-url").value;
+            const biosUrl = document.getElementById("bios-url").value;
+            const romFileName = romUrl.split("/").pop();
+            const romExtension = romFileName.split(".").pop();
+            const core = getCoreFromExtension(romExtension);
+
+            if (!core) {
+                alert("Unsupported ROM file type.");
+            } else {
+                // Hide the Play Button
+                document.getElementById("play-button").style.display = 'none';
+
+                // Configure EmulatorJS
+                window.EJS_player = "#game";
+                window.EJS_core = core;
+                window.EJS_gameUrl = romUrl;
+                window.EJS_gameName = romFileName.split(".")[0]; // Name without extension
+                window.EJS_biosUrl = biosUrl; // BIOS file path
+                window.EJS_pathtodata = "data/";  // Adjust if necessary
+                window.EJS_startOnLoaded = true;
+
+                // Load the EmulatorJS loader script
+                const script = document.createElement("script");
+                script.src = "data/loader.js"; // Adjust path if necessary
+                document.body.appendChild(script);
+            }
+        });
+    </script>
+</body>
+</html>
